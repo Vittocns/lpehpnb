@@ -1,8 +1,14 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, Shield, Building2 } from "lucide-react";
 
-const WHATSAPP_URL =
-  "https://wa.me/554130748100?text=Olá.%20Preciso%20dos%20serviços%20da%20EHP!";
+import WhatsAppModal from "@/components/WhatsAppModal";
+import { sendLead } from "@/lib/sendLead";
+
+const buildWhatsAppUrl = (name: string) =>
+  `https://wa.me/554130748100?text=Olá,%20me%20chamo%20${encodeURIComponent(
+    name,
+  )}.%20Preciso%20dos%20serviços%20da%20EHP!`;
 
 const gadgets = [
   { icon: Shield, label: "+ 15 anos em Curitiba" },
@@ -10,6 +16,14 @@ const gadgets = [
 ];
 
 const HeroSection = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleSubmit = async (name: string, phone: string) => {
+    await sendLead({ name, phone, source: "hero" });
+    setModalOpen(false);
+    window.open(buildWhatsAppUrl(name), "_blank");
+  };
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
       {/* Background layers */}
@@ -60,15 +74,14 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           className="mt-10"
         >
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
             className="inline-flex items-center gap-2.5 rounded-lg bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-tech transition-all duration-200 hover:shadow-tech-hover hover:-translate-y-0.5"
           >
             <MessageCircle className="h-5 w-5" />
             Enviar WhatsApp
-          </a>
+          </button>
         </motion.div>
 
         {/* Gadgets */}
@@ -95,6 +108,12 @@ const HeroSection = () => {
           ))}
         </motion.div>
       </div>
+
+      <WhatsAppModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </section>
   );
 };
